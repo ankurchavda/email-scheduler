@@ -8,8 +8,5 @@
   },
   "author": "Ankur Chavda",
   "license": "ISC",
-  "dependencies": {
-    "mongoose": "^4.11.1",
-    "randomstring": "^1.1.5"
-  }
+  "dependencies": {}
 }

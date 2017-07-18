@@ -1,5 +1,4 @@
 var schedule = require('node-schedule');
-var async= require('async');
 var child_process = require('child_process');
 var contactId , campaignId = '';
 // var date = new Date(2017, 6, 12, 13, 6 , 0);
