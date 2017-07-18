@@ -1,6 +1,5 @@
 var mailjet = require('node-mailjet').connect('f85a7eea9ded028feabf8247435c4828', 'cc24dc284df3a8449fdbc39964482794');
 var fs = require('fs');
-var subDb = require('./models/sub');
 // const csvFilePath='.csv';
 
 module.exports.createContactList = function(name, callback){
