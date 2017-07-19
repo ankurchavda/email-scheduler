@@ -2,7 +2,7 @@ var schedule = require('node-schedule');
 var child_process = require('child_process');
 var contactId , campaignId = '';
 // var date = new Date(2017, 6, 12, 13, 6 , 0);
-var i = 0 , j = -1 , skip = "596ccd84f144ea2498120000", limit = 0;
+var i = 0 , j = -1 , skip = "196ccd84f144ea2498120000", limit = 0;
 var arr = '';
 
 process.on('message',(m) =>{
