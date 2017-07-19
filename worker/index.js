@@ -16,7 +16,7 @@ var obj = {
 		title:"Naya!"
 	},
 	condition:{
-		click: 'f',
+		click: null,
 		open: null
 	},
 	path : "../emailer/index.js",

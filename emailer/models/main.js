@@ -35,5 +35,12 @@ module.exports = function(mon){
 		.select({'email': 1, 'campaignResponse': 1}).lean();
 	}
 
+	module.getUsers= function(limit, skip, callback){
+		console.log("skip: "+skip+" "+"limit: "+limit);
+		User.find({ _id:{$gt: skip}},callback)
+		.limit(limit)
+		.sort('_id')
+		.select({'email': 1, 'campaignResponse': 1}).lean();	
+	}
 	return module;
 }
