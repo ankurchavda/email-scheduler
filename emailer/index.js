@@ -6,7 +6,8 @@ var mainDb = require('./models/main')(main);
 var mail =require('./mail');
 var random = require('randomstring');
 var arr = [];
-var data = '';
+var data = '';	
+var baseUrl = "http://35.185.235.73:5000/";
 process.on('message',(m) =>{
 	
 	async.series([ 
@@ -25,8 +26,8 @@ process.on('message',(m) =>{
 							process.exit();
 						process.send(res[res.length-1]._id);
 						for(var i = 0 ; i< res.length ; i++)
-						{
-							arr.push({email: res[i].email});
+						{	var url = baseUrl+'/retailerId/'+m.retailerId+'/'+res[i]._id;
+							arr.push({email: res[i].email, Properties:{"Url":url}});
 						}
 						callback(null,"Users pulled from the database");
 					}
@@ -53,8 +54,28 @@ process.on('message',(m) =>{
 					}
 				});					
 			}
-			else if(m.condition.click == null && m.condition.open == null){
+			else if(m.condition.click != null && m.condition.open != null){
 				mainDb.getUsersOpenNClick(m.limit , m.skip ,m.condition.click, m.condition.getUsersOpen,function(err, res){
+					if(err)
+					{
+						console.log(err+" 1");
+						callback(err);
+					}
+					else{
+						console.log(res);
+						if(!res.length)
+							process.exit();
+						process.send(res[res.length-1]._id);
+						for(var i = 0 ; i< res.length ; i++)
+						{
+							arr.push({email: res[i].email});
+						}
+						callback(null,"Users pulled from the database");
+					}
+				});
+			}
+			else if(m.condition.click == null && m.condition.open == null){
+				mainDb.getUsers(m.limit , m.skip ,function(err, res){
 					if(err)
 					{
 						console.log(err+" 1");
@@ -131,16 +152,16 @@ process.on('message',(m) =>{
 					callback(null, "Campaign sent!, Enjoy");
 				}
 			});
-		},	function(callback){
-			mail.deleteContactList(contactId, function(err, result){
-				if(err)
-				{
-					console.log(err+" 7");
-					callback(err);
-				}	
-				else callback(null,"contact list deleted");
-			});
-		}], function(err, results){
+		}//,	function(callback){
+		// 	mail.deleteContactList(contactId, function(err, result){
+		// 		if(err)
+		// 		{
+		// 			console.log(err+" 7");
+		// 			callback(err);
+		// 		}	
+		// 		else callback(null,"contact list deleted");
+		// 	});
+		], function(err, results){
 			console.log(results+"\n\ndone............. \n\n");
 			process.exit();
 		});	
