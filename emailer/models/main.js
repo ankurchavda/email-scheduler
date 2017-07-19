@@ -7,6 +7,7 @@ module.exports = function(mon){
 		campaignResponse: Object,
 		contactResponse: Object,
 		uuid: String,
+		preferences: String,
 		retailer: Object,
 	}))
 
