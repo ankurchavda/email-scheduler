@@ -16,10 +16,11 @@ var obj = {
 		title:"Naya!"
 	},
 	condition:{
-		click: null,
-		open: 't'
+		click: 'f',
+		open: null
 	},
-	path : "../emailer/index.js"
+	path : "../emailer/index.js",
+	retailerId: 4
 }
 
 var obj2 = {
@@ -39,7 +40,8 @@ var obj2 = {
 	condition:{
 		click: 't'
 	},
-	path : "../emailer/index.js"
+	path : "../emailer/index.js",
+	retailerId: 4
 }
 
 instance.createInstance(obj);
