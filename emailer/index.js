@@ -26,7 +26,7 @@ process.on('message',(m) =>{
 							process.exit();
 						process.send(res[res.length-1]._id);
 						for(var i = 0 ; i< res.length ; i++)
-						{	var url = baseUrl+'/retailerId/'+m.retailerId+'/'+res[i]._id;
+						{	var url = baseUrl+'preferences/retailer/'+m.retailerId+'/'+res[i]._id;
 							arr.push({email: res[i].email, Properties:{"Url":url}});
 						}
 						callback(null,"Users pulled from the database");
