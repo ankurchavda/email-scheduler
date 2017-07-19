@@ -81,7 +81,7 @@ module.exports.addBody = function(id, callback){
 	.id(id)
 	.action("detailcontent")
 	.request({
-		"Html-part":"Hello <strong>world</strong>!",
+		"Html-part":"Hello <strong>[[data:url:\"\"]]</strong>!",
 		"Text-part":"Hello world!"
 	})
 	request
