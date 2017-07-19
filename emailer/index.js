@@ -1,7 +1,7 @@
 var async= require('async');
 var contactId , campaignId = '';
 var mongoose = require('mongoose');
-var main = mongoose.createConnection('mongodb://localhost/main');
+var main = mongoose.createConnection('mongodb://root:Skylark9189@130.211.139.247/main');
 var mainDb = require('./models/main')(main);
 var mail =require('./mail');
 var random = require('randomstring');
