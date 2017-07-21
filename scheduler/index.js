@@ -16,26 +16,15 @@ process.on('message',(m) =>{
 	delete jsonObj.recurrence;
 	delete jsonObj.array;
 	delete jsonObj.path;
-	var job= schedule.scheduleJob(rule, function(){
-		
-		// if(j<0)
-		// {
-		// 	limit = arr[i];
-		// }
-		// else
-		// {
-		// 	limit = arr[i];
-		// 	skip += arr[j];
-		// }
+	var job= schedule.scheduleJob(rule, function(){	
 		limit = arr[i];
-
 		jsonObj['limit']= limit;
 		jsonObj['skip']= skip;
 		var worker_process = child_process.fork(path); // Path to the child index.js
 		worker_process.send(jsonObj);
 		worker_process.on('message', (message)=>{
 			skip = message;
-		})	
+		});	
 		worker_process.on('close', function (code) {
 			i++;
 			j++;
