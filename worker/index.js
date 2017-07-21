@@ -17,7 +17,8 @@ var obj = {
 	},
 	condition:{
 		click: null,
-		open: null
+		open: null,
+		campaignResponse : null
 	},
 	path : "../emailer/index.js",
 	retailerId: 4
@@ -38,7 +39,9 @@ var obj2 = {
 		title:"Naya!"
 	},
 	condition:{
-		click: 't'
+		click: 't',
+		open: 't',
+		campaignResponse : null
 	},
 	path : "../emailer/index.js",
 	retailerId: 4
