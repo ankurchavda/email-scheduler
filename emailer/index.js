@@ -1,19 +1,22 @@
 var async = require('async');
-var contactId, campaignId = '';
+var contactId, newsLetterId, campaignId = '';
 var mongoose = require('mongoose');
-var main = mongoose.createConnection('mongodb://root:Skylark9189@130.211.139.247/main');
+var main = mongoose.createConnection('mongodb://localhost/communication');
 var mainDb = require('./models/main')(main);
 var mail = require('./mail');
+var Campaign = require('./models/campaign')(main);
 var random = require('randomstring');
 var arr = [];
 var data = '';
 var baseUrl = "http://35.185.235.73:5000/";
+var skip = '';
+var fs = require('fs');
 process.on('message', (m) => {
 
 	async.series([
 		function (callback) {
-			if (m.condition.click != null && m.condition.open == null) {
-				mainDb.getUsersClick(m.limit, m.skip, m.condition.click, function (err, res) {
+			if (m.condition.open != null && m.campaignSummary != null) {
+				mainDb.getUsersOpen(m.limit, m.retailerId, m.skip, m.condition.open.greaterThanEqual, m.condition.open.lessThan, function (err, res) {
 					if (err) {
 						console.log(err + " 1");
 						callback(err);
@@ -21,7 +24,7 @@ process.on('message', (m) => {
 						console.log(res);
 						if (!res.length)
 							process.exit();
-						process.send(res[res.length - 1]._id);
+						skip = res[res.length - 1]._id;
 						for (var i = 0; i < res.length; i++) {
 							var url = baseUrl + 'preferences/retailer/' + m.retailerId + '/' + res[i]._id;
 							arr.push({
@@ -34,51 +37,30 @@ process.on('message', (m) => {
 						callback(null, "Users pulled from the database");
 					}
 				});
-			} else if (m.condition.click == null && m.condition.open != null) {
-				mainDb.getUsersOpen(m.limit, m.skip, m.condition.open, function (err, res) {
-					if (err) {
-						console.log(err + " 1");
-						callback(err);
-					} else {
-						console.log(res);
-						if (!res.length)
-							process.exit();
-						process.send(res[res.length - 1]._id);
-						for (var i = 0; i < res.length; i++) {
-							var url = baseUrl + 'preferences/retailer/' + m.retailerId + '/' + res[i]._id;
-							arr.push({
-								email: res[i].email,
-								Properties: {
-									"Url": url
-								}
-							});
-						}
-						callback(null, "Users pulled from the database");
-					}
-				});
-			} else if (m.condition.click != null && m.condition.open != null) {
-				mainDb.getUsersOpenNClick(m.limit, m.skip, m.condition.click, m.condition.getUsersOpen, function (err, res) {
-					if (err) {
-						console.log(err + " 1");
-						callback(err);
-					} else {
-						console.log(res);
-						if (!res.length)
-							process.exit();
-						process.send(res[res.length - 1]._id);
-						for (var i = 0; i < res.length; i++) {
-							var url = baseUrl + 'preferences/retailer/' + m.retailerId + '/' + res[i]._id;
-							arr.push({
-								email: res[i].email,
-								Properties: {
-									"Url": url
-								}
-							});
-						}
-						callback(null, "Users pulled from the database");
-					}
-				});
-			} else if (m.campaignResponse == null) {
+			} //else if (m.condition.click != null && m.condition.open != null) {
+			// 	mainDb.getUsersOpenNClick(m.limit, m.skip, m.condition.click, m.condition.getUsersOpen, function (err, res) {
+			// 		if (err) {
+			// 			console.log(err + " 1");
+			// 			callback(err);
+			// 		} else {
+			// 			console.log(res);
+			// 			if (!res.length)
+			// 				process.exit();
+			// 			skip=res[res.length - 1]._id;
+			// 			for (var i = 0; i < res.length; i++) {
+			// 				var url = baseUrl + 'preferences/retailer/' + m.retailerId + '/' + res[i]._id;
+			// 				arr.push({
+			// 					email: res[i].email,
+			// 					Properties: {
+			// 						"Url": url
+			// 					}
+			// 				});
+			// 			}
+			// 			callback(null, "Users pulled from the database");
+			// 		}
+			// 	});
+			/*}*/
+			else if (m.campaignSummary == null) {
 				mainDb.getUsersWithNoCampaign(m.limit, m.skip, function (err, res) {
 					if (err) {
 						console.log(err + " 1");
@@ -87,7 +69,7 @@ process.on('message', (m) => {
 						console.log(res);
 						if (!res.length)
 							process.exit();
-						process.send(res[res.length - 1]._id);
+						skip = res[res.length - 1]._id;
 						for (var i = 0; i < res.length; i++) {
 							var url = baseUrl + 'preferences/retailer/' + m.retailerId + '/' + res[i]._id;
 							arr.push({
@@ -132,22 +114,22 @@ process.on('message', (m) => {
 					console.log(err + " 4");
 					callback(err);
 				} else
-					campaignId = result.Data[0].ID;
-				callback(null, "Campaign prepared with campaignId: " + campaignId);
+					newsLetterId = result.Data[0].ID;
+				callback(null, "Campaign prepared with newsLetterId: " + newsLetterId);
 			});
 		},
 		function (callback) {
-			mail.addBody(campaignId, function (err, result) {
+			mail.addBody(m.htmlPath, m.textPath, newsLetterId, function (err, result) {
 				if (err) {
 					console.log(err + " 5");
 					callback(err);
 				} else {
-					callback(null, "Added body to the campaign with campaignId: " + campaignId);
+					callback(null, "Added body to the campaign with newsLetterId: " + newsLetterId);
 				}
 			});
 		},
 		function (callback) {
-			mail.sendCampaign(campaignId, function (err, result) {
+			mail.sendCampaign(newsLetterId, function (err, result) {
 				if (err) {
 					console.log(err + " 6");
 					callback(err);
@@ -157,9 +139,38 @@ process.on('message', (m) => {
 			});
 		},
 		function (callback) {
-			mail.deleteContactList(contactId, function (err, result) {
+			mail.campaignStats(newsLetterId, function (err, res) {
 				if (err) {
 					console.log(err + " 7");
+					callback(err);
+				} else {
+					var campaignId = res.Data[0].CampaignID;
+					var campaignObj = {};
+					campaignObj['subject'] = m.campaign.subject;
+					campaignObj['sender'] = m.campaign.sender;
+					campaignObj['email'] = m.campaign.email
+					campaignObj['title'] = m.campaign.title
+					campaignObj['text'] = fs.readFileSync(m.textPath, 'utf8');
+					campaignObj['html'] = fs.readFileSync(m.htmlPath, 'utf8');
+					Campaign.saveCampaign(m._id, m.limit, campaignId, m.retailerId, campaignObj, function (err, res) {
+						if (err)
+							throw err;
+						else {
+							// console.log(res);
+							process.send({
+								skip: skip,
+								_id: res._id
+							});
+						}
+					})
+					callback(null, "CampaignId pushed to database");
+				}
+			})
+		},
+		function (callback) {
+			mail.deleteContactList(contactId, function (err, result) {
+				if (err) {
+					console.log(err + " 8");
 					callback(err);
 				} else callback(null, "contact list deleted");
 			});
