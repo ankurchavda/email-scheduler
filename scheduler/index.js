@@ -5,7 +5,8 @@ var contactId, campaignId = '';
 var i = 0,
 	j = -1,
 	skip = "196ccd84f144ea2498120000",
-	limit = 0;
+	limit = 0,
+	_id = null;
 var arr = '';
 
 process.on('message', (m) => {
@@ -23,10 +24,12 @@ process.on('message', (m) => {
 		limit = arr[i];
 		jsonObj['limit'] = limit;
 		jsonObj['skip'] = skip;
+		jsonObj['_id'] = _id;
 		var worker_process = child_process.fork(path); // Path to the child index.js
 		worker_process.send(jsonObj);
 		worker_process.on('message', (message) => {
-			skip = message;
+			skip = message.skip;
+			_id = message._id;
 		});
 		worker_process.on('close', function (code) {
 			i++;
