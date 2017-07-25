@@ -1,4 +1,4 @@
-var mailjet = require('node-mailjet').connect('f85a7eea9ded028feabf8247435c4828', 'cc24dc284df3a8449fdbc39964482794');
+var mailjet = require('node-mailjet').connect(process.env.MJ_PUBLIC_KEY, process.env.MJ_PRIVATE_KEY);
 var fs = require('fs');
 // const csvFilePath='.csv';
 
@@ -72,15 +72,16 @@ module.exports.prepareCampaign = function (sender, email, subject, contact, titl
 			return callback(err);
 		})
 }
-
-module.exports.addBody = function (id, callback) {
+module.exports.addBody = function (htmlPath, textPath, id, callback) {
+	var html = fs.readFileSync(htmlPath, 'utf8');
+	var text = fs.readFileSync(textPath, 'utf8');
 	const request = mailjet
 		.post("campaigndraft")
 		.id(id)
 		.action("detailcontent")
 		.request({
-			"Html-part": "Hello <strong>[[data:url:\"\"]]</strong>!",
-			"Text-part": "Hello world!"
+			"Html-part": html,
+			"Text-part": text
 		})
 	request
 		.then((result) => {
@@ -136,19 +137,21 @@ module.exports.jobStatus = function (jobId, callback) {
 		})
 }
 
-// module.exports.campaignStats = function(id){
-// 	const request = mailjet
-// 	.get("contactstatistics")
-// 	.id(email)
-// 	.request()
-// 	request
-// .then((result) => {
-// 	callback(null, result.body);
-// })
-// .catch((err) => {
-// 	return callback(err);
-// })	
-// }
+module.exports.campaignStats = function (id, callback) {
+	const request = mailjet
+		.get("campaignstatistics")
+		.request({
+			"NewsLetter": id
+		})
+	request
+		.then((result) => {
+			callback(null, result.body);
+		})
+		.catch((err) => {
+			console.log(err);
+			callback(err.statusCode)
+		})
+}
 
 module.exports.contactStats = function (email, callback) {
 	const request = mailjet
