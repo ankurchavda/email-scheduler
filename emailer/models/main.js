@@ -27,13 +27,16 @@ module.exports = function (mon) {
 			}).lean();
 	}
 
-	module.getUsersOpen = function (limit, skip, open, callback) {
+	module.getUsersOpen = function (limit, retailer, skip, gt, lt, callback) {
 		console.log("skip: " + skip + " " + "limit: " + limit);
 		User.find({
 				_id: {
 					$gt: skip
 				},
-				'campaignResponse.camp1.open': open
+				['campaignSummary.' + retailer + '.open']: {
+					$gte: gt,
+					$lt: lt
+				}
 			}, callback)
 			.limit(limit)
 			.sort('_id')
@@ -81,15 +84,14 @@ module.exports = function (mon) {
 				_id: {
 					$gt: skip
 				},
-				campaignResponse: {
+				campaignSummary: {
 					$eq: null
 				}
 			}, callback)
 			.limit(limit)
 			.sort('_id')
 			.select({
-				'email': 1,
-				'campaignResponse': 1
+				'email': 1
 			}).lean();
 	}
 	return module;
