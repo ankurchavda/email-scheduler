@@ -1,35 +1,43 @@
 var mongoose = require('mongoose');
-module.exports = function (mon) {
+module.exports = function(mon) {
 	var module = {};
 
-	var User = mon.model('User', new mongoose.Schema({
-		email: String,
-		campaignResponse: Object,
-		contactResponse: Object,
-		uuid: String,
-		preferences: String,
-		retailer: Object,
-	}))
+	var User = mon.model(
+		'User',
+		new mongoose.Schema({
+			email: String,
+			campaignResponse: Object,
+			contactResponse: Object,
+			uuid: String,
+			preferences: String,
+			retailer: Object
+		})
+	);
 
-	module.getUsersClick = function (limit, skip, click, callback) {
-		console.log("skip: " + skip + " " + "limit: " + limit);
-		User.find({
+	module.getUsersClick = function(limit, skip, click, callback) {
+		console.log('skip: ' + skip + ' ' + 'limit: ' + limit);
+		User.find(
+			{
 				_id: {
 					$gt: skip
 				},
 				'campaignResponse.camp1.click': click
-			}, callback)
+			},
+			callback
+		)
 			.limit(limit)
 			.sort('_id')
 			.select({
-				'email': 1,
-				'campaignResponse': 1
-			}).lean();
-	}
+				email: 1,
+				campaignResponse: 1
+			})
+			.lean();
+	};
 
-	module.getUsersOpen = function (limit, retailer, skip, gt, lt, callback) {
-		console.log("skip: " + skip + " " + "limit: " + limit);
-		User.find({
+	module.getUsersOpen = function(limit, retailer, skip, gt, lt, callback) {
+		console.log('skip: ' + skip + ' ' + 'limit: ' + limit);
+		User.find(
+			{
 				_id: {
 					$gt: skip
 				},
@@ -37,62 +45,77 @@ module.exports = function (mon) {
 					$gte: gt,
 					$lt: lt
 				}
-			}, callback)
+			},
+			callback
+		)
 			.limit(limit)
 			.sort('_id')
 			.select({
-				'email': 1,
-				'campaignResponse': 1
-			}).lean();
-	}
+				email: 1,
+				campaignResponse: 1
+			})
+			.lean();
+	};
 
-	module.getUserOpenNCLick = function (limit, skip, click, open, callback) {
-		console.log("skip: " + skip + " " + "limit: " + limit);
-		User.find({
+	module.getUserOpenNCLick = function(limit, skip, click, open, callback) {
+		console.log('skip: ' + skip + ' ' + 'limit: ' + limit);
+		User.find(
+			{
 				_id: {
 					$gt: skip
 				},
 				'campaignResponse.camp1.click': click,
 				'campaignResponse.camp1.open': open
-			}, callback)
+			},
+			callback
+		)
 			.limit(limit)
 			.sort('_id')
 			.select({
-				'email': 1,
-				'campaignResponse': 1
-			}).lean();
-	}
+				email: 1,
+				campaignResponse: 1
+			})
+			.lean();
+	};
 
-	module.getUsers = function (limit, skip, callback) {
-		console.log("skip: " + skip + " " + "limit: " + limit);
-		User.find({
+	module.getUsers = function(limit, skip, callback) {
+		console.log('skip: ' + skip + ' ' + 'limit: ' + limit);
+		User.find(
+			{
 				_id: {
 					$gt: skip
 				}
-			}, callback)
+			},
+			callback
+		)
 			.limit(limit)
 			.sort('_id')
 			.select({
-				'email': 1,
-				'campaignResponse': 1
-			}).lean();
-	}
+				email: 1,
+				campaignResponse: 1
+			})
+			.lean();
+	};
 
-	module.getUsersWithNoCampaign = function (limit, skip, callback) {
-		console.log("skip: " + skip + " " + "limit: " + limit);
-		User.find({
+	module.getUsersWithNoCampaign = function(limit, skip, callback) {
+		console.log('skip: ' + skip + ' ' + 'limit: ' + limit);
+		User.find(
+			{
 				_id: {
 					$gt: skip
 				},
 				campaignSummary: {
 					$eq: null
 				}
-			}, callback)
+			},
+			callback
+		)
 			.limit(limit)
 			.sort('_id')
 			.select({
-				'email': 1
-			}).lean();
-	}
+				email: 1
+			})
+			.lean();
+	};
 	return module;
-}
+};
