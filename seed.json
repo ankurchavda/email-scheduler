@@ -1,0 +1,26 @@
+{
+	"array": [ 1, 1 ],
+	"recurrence": {
+		"second": 50,
+		"minute": null,
+		"hour": null,
+		"dayOfweek": null
+	},
+	"campaign": {
+		"sender": "StartUp India Yatra",
+		"email": "fashion@getposhaq.com",
+		"subject": "{Invitation} StartUp India Yatra Chapter",
+		"title": "StartUp India Yatra Campaign"
+	},
+	"condition": {
+		"open": {
+			"greaterThanEqual": 1,
+			"lessThan": 2
+		},
+		"campaignSummary": null
+	},
+	"textPath": "../template.txt",
+	"htmlPath": "../template.html",
+	"path": "../emailer/index.js",
+	"retailerId": "4"
+}
