@@ -8,5 +8,9 @@
   },
   "author": "Ankur Chavda",
   "license": "ISC",
-  "dependencies": {}
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "express-fileupload": "^0.1.4"
+  }
 }
