@@ -18,16 +18,23 @@ app.use(function(req, res, next) {
 });
 
 app.post('/start', function(req, res){
-	if(!req.files.seed)
-		res.status(400).send("Please upload the seed file");
+	if(!req.files.seed || !req.files.html || !req.files.text)
+		res.status(400).send("Please upload all the required files");
 
 	var file = req.files.seed;
+	var html = req.files.html;
+	var text = req.files.text;
+	html.mv('../template.html',function(err){
+		if(err)
+			throw err;
+	})
+	text.mv('../template.txt',function(err){
+		if(err)
+			throw err;
+	});	
 	var obj = JSON.parse(file.data.toString('ascii'));
 	console.log(obj);
 	instance.createInstance(obj);
-	// var json = fs.readFileSync('../seed.json', 'utf8');
-	// console.log(json);
-
 	res.status(200).send("Started....");	
 });
 

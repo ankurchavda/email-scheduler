@@ -1,9 +1,11 @@
+require('dotenv').config({path: "../development.env"});
 const csv=require('csvtojson')
 var async = require('async');
 var fs = require('fs');
 var mailjet = require('node-mailjet').connect(process.env.MJ_PUBLIC_KEY,process.env.MJ_PRIVATE_KEY);
 
 module.exports.getCampaignResponse = function(User, Campaign, callback){
+	var count =0 ;
 	Campaign.getCampaigns(function(err, res){
 		if(err)
 			callback(err);
@@ -13,6 +15,7 @@ module.exports.getCampaignResponse = function(User, Campaign, callback){
 				let arr = res[camp].campaignID;
 				for(let i=0; i < arr.length ; i++){
 					let users = arr[i].users;
+					console.log(users+" users");
 					let id = arr[i].id;
 					let loop = Math.ceil(users/1000);
 					let limit = 0, offset = 0;
@@ -22,6 +25,7 @@ module.exports.getCampaignResponse = function(User, Campaign, callback){
 							users-=limit;
 						} else{
 							limit = users;
+							console.log(limit+" limit");
 						}
 						const request = mailjet
 						.get("messagesentstatistics")
@@ -34,7 +38,8 @@ module.exports.getCampaignResponse = function(User, Campaign, callback){
 						request
 						.then((result) => {
 							let data = result.body.Data;
-							for(let val = 0 ; val < result.body.Data.length; val++){
+							console.log(data.length+" length");
+							for(let val = 0 ; val < data.length; val++){
 								let jsonObj = data[val];
 								let email = jsonObj.ToEmail;
 								jsonObj['retailer'] = res[camp].retailer;
@@ -77,7 +82,9 @@ module.exports.addUser = function(path, file, User,callback){
 			.fromFile(path)
 			.on('json',(jsonObj)=>{
 				var email = jsonObj.email;
-				User.addEmails(email, function(err, res){
+				delete jsonObj.email;
+				var profile = jsonObj;
+				User.addEmails(email, profile,function(err, res){
 					if(err=="User already exists")
 					{}
 				else{
@@ -98,7 +105,7 @@ module.exports.generateInvoice = function(Campaign, retailer, from , to, callbac
 
 	Campaign.getCampaignsBetweenDates(retailer,from ,to, function(err,result){
 		if(err)
-			 callback(err);
+			callback(err);
 		else{
 			var body=[]; var header = [];
 			var isHeaderSet = false;
