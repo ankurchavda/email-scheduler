@@ -4,12 +4,14 @@
   "description": "An emailer to send campaigns/mails to users",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "author": "Ankur Chavda",
   "license": "ISC",
   "dependencies": {
     "async": "^2.5.0",
+    "dotenv": "^4.0.0",
     "mongoose": "^4.11.3",
     "node-mailjet": "^3.1.0",
     "randomstring": "^1.1.5"
