@@ -1,5 +1,6 @@
+require('dotenv').config({path: "../development.env"});
 var mongoose = require('mongoose');
-var main = mongoose.createConnection('mongodb://localhost/communication');
+var main = mongoose.createConnection(process.env.DB_URL);
 var express=require('express');
 var app = express();
 var User = require('./models/main')(main);

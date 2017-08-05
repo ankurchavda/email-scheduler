@@ -4,6 +4,7 @@ module.exports = function(mon){
 
 	var Campaign = mon.model('Campaign', new mongoose.Schema({
 		campaignID : [{
+			_id: false,
 			id: String,
 			users: String,
 			sent_date: {

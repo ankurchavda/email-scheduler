@@ -1,10 +1,11 @@
+require('dotenv').config({path: "../development.env"});
 var mongoose = require('mongoose');
 var random = require('randomstring');
 var async = require('async');
 var contactId,
-	newsLetterId,
-	campaignId = '';
-var main = mongoose.createConnection('mongodb://localhost/communication');
+newsLetterId,
+campaignId = '';
+var main = mongoose.createConnection(process.env.DB_URL);
 var mainDb = require('./models/main')(main);
 var mail = require('./mail');
 var Campaign = require('./models/campaign')(main);
@@ -13,64 +14,19 @@ var data = '';
 var baseUrl = 'http://35.185.235.73:5000/';
 var skip = '';
 var fs = require('fs');
-
+var textPath = "../template.txt";
+var htmlPath= "../template.html";
 process.on('message', (m) => {
 	async.series(
-		[
-			function (callback) {
-				if (m.condition.open != null && m.campaignSummary != null) {
-					mainDb.getUsersOpen(
-						m.limit,
-						m.retailerId,
-						m.skip,
-						m.condition.open.greaterThanEqual,
-						m.condition.open.lessThan,
-						function (err, res) {
-							if (err) {
-								console.log(err + ' 1');
-								callback(err);
-							} else {
-								console.log(res);
-								if (!res.length) process.exit();
-								skip = res[res.length - 1]._id;
-								for (var i = 0; i < res.length; i++) {
-									var url = baseUrl + 'preferences/retailer/' + m.retailerId + '/' + res[i]._id;
-									arr.push({
-										email: res[i].email,
-										Properties: {
-											Url: url
-										}
-									});
-								}
-								callback(null, 'Users pulled from the database');
-							}
-						}
-					);
-				} else if (m.campaignSummary == null) {
-					//else if (m.condition.click != null && m.condition.open != null) {
-					// 	mainDb.getUsersOpenNClick(m.limit, m.skip, m.condition.click, m.condition.getUsersOpen, function (err, res) {
-					// 		if (err) {
-					// 			console.log(err + " 1");
-					// 			callback(err);
-					// 		} else {
-					// 			console.log(res);
-					// 			if (!res.length)
-					// 				process.exit();
-					// 			skip=res[res.length - 1]._id;
-					// 			for (var i = 0; i < res.length; i++) {
-					// 				var url = baseUrl + 'preferences/retailer/' + m.retailerId + '/' + res[i]._id;
-					// 				arr.push({
-					// 					email: res[i].email,
-					// 					Properties: {
-					// 						"Url": url
-					// 					}
-					// 				});
-					// 			}
-					// 			callback(null, "Users pulled from the database");
-					// 		}
-					// 	});
-					/*}*/
-					mainDb.getUsersWithNoCampaign(m.limit, m.skip, function (err, res) {
+		[function (callback) {
+			if (m.condition.open != null && m.campaignSummary != null) {
+				mainDb.getUsersOpen(
+					m.limit,
+					m.retailerId,
+					m.skip,
+					m.condition.open.greaterThanEqual,
+					m.condition.open.lessThan,
+					function (err, res) {
 						if (err) {
 							console.log(err + ' 1');
 							callback(err);
@@ -85,6 +41,28 @@ process.on('message', (m) => {
 									Properties: {
 										Url: url
 									}
+								});
+							}
+							callback(null, 'Users pulled from the database');
+						}
+					}
+					);
+			} else if (m.campaignSummary == null) {
+					mainDb.getUsersWithNoCampaign(m.limit, m.skip, function (err, res) {
+						if (err) {
+							console.log(err + ' 1');
+							callback(err);
+						} else {
+							console.log(res);
+							if (!res.length) process.exit();
+							skip = res[res.length - 1]._id;
+							for (var i = 0; i < res.length; i++) {
+								var url = baseUrl + 'preferences/retailer/' + m.retailerId + '/' + res[i]._id;
+								arr.push({
+									email: res[i].email,
+									// Properties: {
+									// 	Name: res[i].profile.name
+									// }
 								});
 							}
 							callback(null, 'Users pulled from the database');
@@ -129,7 +107,7 @@ process.on('message', (m) => {
 						} else newsLetterId = result.Data[0].ID;
 						callback(null, 'Campaign prepared with newsLetterId: ' + newsLetterId);
 					}
-				);
+					);
 			},
 			function (callback) {
 				mail.addBody(m.htmlPath, m.textPath, newsLetterId, function (err, result) {
@@ -163,12 +141,12 @@ process.on('message', (m) => {
 						campaignObj['sender'] = m.campaign.sender;
 						campaignObj['email'] = m.campaign.email;
 						campaignObj['title'] = m.campaign.title;
-						campaignObj['text'] = fs.readFileSync(m.textPath, 'utf8');
-						campaignObj['html'] = fs.readFileSync(m.htmlPath, 'utf8');
+						campaignObj['text'] = fs.readFileSync(textPath, 'utf8');
+						campaignObj['html'] = fs.readFileSync(htmlPath, 'utf8');
 						Campaign.saveCampaign(m._id, m.limit, campaignId, m.retailerId, campaignObj, function (
 							err,
 							res
-						) {
+							) {
 							if (err) throw err;
 							else {
 								// console.log(res);
@@ -190,10 +168,12 @@ process.on('message', (m) => {
 					} else callback(null, 'contact list deleted');
 				});
 			}
-		],
-		function (err, results) {
-			console.log(results + '\n\ndone............. \n\n');
-			process.exit();
-		}
-	);
+			],
+			function (err, results) {
+				fs.unlink(textPath);
+				fs.unlink(htmlPath);
+				console.log(results + '\n\ndone............. \n\n');
+				process.exit();
+			}
+			);
 });

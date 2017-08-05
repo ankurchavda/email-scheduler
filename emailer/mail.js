@@ -1,3 +1,4 @@
+require('dotenv').config({path: "../development.env"});
 var mailjet = require('node-mailjet').connect(process.env.MJ_PUBLIC_KEY, process.env.MJ_PRIVATE_KEY);
 var fs = require('fs');
 // const csvFilePath='.csv';
