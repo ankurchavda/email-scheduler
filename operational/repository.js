@@ -47,22 +47,22 @@ module.exports.getCampaignResponse = function (User, Campaign, callback) {
 								.then((result) => {
 									let data = result.body.Data;
 									var loop = 0;
-									var a = data.slice(0);
-									responses = responses.concat(data);
-									// async.eachSeries(data, function (single, callback4) {
-									// 	single['retailer'] = value.retailer;
-									// 	single['campId'] = id;
-									// 	single['_id'] = _id;
-									// 	responses.push(single);
-									// 	return callback4();
-									// }, function (err) {
-									// 	// console.log(responses);
-									// 	if (err) {
-									// 		return callback3(err);
-									// 	}
-									// 	return callback3();
-									// })
-									return callback3();
+									// var a = data.slice(0);
+									// responses = responses.concat(data);
+									async.eachSeries(data, function (single, callback4) {
+										single['retailer'] = value.retailer;
+										single['campId'] = id;
+										single['_id'] = _id;
+										responses.push(single);
+										return callback4();
+									}, function (err) {
+										// console.log(responses);
+										if (err) {
+											return callback3(err);
+										}
+										return callback3();
+									})
+									// return callback3();
 								})
 								.catch((err) => {
 									console.log(err);
@@ -97,7 +97,7 @@ module.exports.getCampaignResponse = function (User, Campaign, callback) {
 					let email = jsonObj.ToEmail;
 					jsonObj['summary'] = 'f';
 					let tempObj = {};
-					tempObj[jsonObj.campId] = jsonObj;
+					tempObj[jsonObj['campId']] = jsonObj;
 					let options = {
 						new: true
 					};
