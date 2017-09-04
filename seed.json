@@ -1,5 +1,5 @@
 {
-	"array": [ 1, 1 ],
+	"array": [ 2 ],
 	"recurrence": {
 		"second": 50,
 		"minute": null,
