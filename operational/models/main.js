@@ -29,32 +29,55 @@ module.exports = function(mon){
 			}
 		})
 	}
+	var count = 0;
 	module.addCampaignResponse = function(email,campId,update,options,callback)
-	{	
-		console.log(email);
+	{	/*console.log(update+" "+count++);*/
+	// console.log(email+" email");
+	// console.log(update+" update");
 		User.findOneAndUpdate({ email:email, campaignResponse: {$eq:null}}, {$set: {campaignResponse: update}},options,function(err,res){
 			if(err)
 				throw err;
 			else{
+				// console.log(res+" "+"update response");
 				if(!res){
-					User.findOne({email:email}, function(err,result){
-						if(err)
-							callback(err)
-						else{
-							if(result)
-							{
+					async.waterfall([function(_callback){
+						User.findOne({email:email}, function(err,result){
+							if(err)
+								return _callback(err)
+							else{
+								return _callback(err,result);
+							}
+						})
+					}, function(result, _callback){
+						if(result)
+							{	
+								console.log(result);
 								var data =result.campaignResponse;
+								// console.log(data);
+								// console.log("\n-----------------------------------------------------------\n");
 								data[campId]=update[campId];
 								User.findOneAndUpdate({email:email}, {$set: {campaignResponse:data}},{new: true},function(err,result2){
-									if(err)
-										throw err;
-									else
-										callback(err,result2);
+									if(err){
+										console.log(err);
+										return _callback(err);
+									}
+									else{
+										console.log("aaya");
+										return _callback(err,result2);										
+									}
 								})
 							}
-							callback(err,result);
+					}], function(err){
+						if(err){
+							console.log(err);
+							return callback(err)
 						}
-					})	
+						return callback();
+					})
+				}
+				// console.log("last");
+				else{
+					return callback(err,res);
 				}
 			}
 		});
