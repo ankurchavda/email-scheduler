@@ -17,6 +17,8 @@
     "express": "^4.15.3",
     "express-fileupload": "^0.1.4",
     "mongoose": "^4.11.2",
+    "morgan": "^1.8.2",
+    "node-mailjet": "^3.2.1",
     "nodemon": "^1.11.0",
     "voilab-pdf-table": "^0.3.0"
   }
