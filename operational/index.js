@@ -7,10 +7,14 @@ var User = require('./models/main')(main);
 var bodyParser = require('body-parser');
 var Campaign = require('./models/campaign')(main);
 var fileUpload = require('express-fileupload');
+var logger = require('morgan');
 
+//middlewares
+app.use(logger('tiny'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(fileUpload());
+
 app.set('port', process.env.PORT || 3000);
 
 // Enabling Cross Origin Requests
