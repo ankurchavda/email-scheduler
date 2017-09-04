@@ -7,6 +7,7 @@ module.exports = function(User, Campaign){
 	router.get('/campaignresponse', function(req,res){
 		Repo.getCampaignResponse(User, Campaign, function(err,result){
 			if(err){
+				console.log(err);
 				throw err;
 			} else{
 				res.status(200).send("Done");
