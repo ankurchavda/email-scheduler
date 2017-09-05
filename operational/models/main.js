@@ -88,9 +88,9 @@ module.exports = function(mon){
 			if(err)
 				throw err;
 			else{
-				async.timesSeries(res.length, function(n, _callback){
-					var campaingResponseObj = res[n];
-					async.eachOfSeries(campaingResponseObj.campaignResponse, function(response, key,callback1){
+				for(let i =0 ; i < res.length ; i++){
+					var campaingResponseObj = res[i];
+					async.eachOfSeries(campaingResponseObj.campaignResponse, function(response, key,callback){
 						if(response.summary=='f')
 						{
 							if(!campaingResponseObj.campaignSummary){
@@ -107,14 +107,12 @@ module.exports = function(mon){
 								var obj = response;
 								obj['summary'] = 't';
 								User.findOneAndUpdate({email: campaingResponseObj.email},{$set: {campaignSummary: temp , ['campaignResponse.'+key]: obj }},{new: true},function(err ,result2){
-									if(err){
-										console.log(err);
-										return callback1(err);										
-									}
+									if(err)
+										callback(err);
 									else{
 										campaingResponseObj = result2;
 										console.log(result2);
-										return callback1(null, "Done");
+										callback(null, "Done");
 									}
 								})
 							}
@@ -132,14 +130,12 @@ module.exports = function(mon){
 								var obj = response;
 								obj['summary'] = 't';									
 								User.findOneAndUpdate({email: campaingResponseObj.email},{$set: {campaignSummary: temp, ['campaignResponse.'+key]: obj}},{new: true},function(err ,result2){
-									if(err){
+									if(err)
 										console.log(err);
-										return callback1(err);										
-									}
 									else{
 										campaingResponseObj = result2;
 										console.log(result2);
-										return callback1(null, "Done");
+										callback(null, "Done");
 									}
 								})	
 							}
@@ -157,14 +153,12 @@ module.exports = function(mon){
 								var obj = response;
 								obj['summary'] = 't';
 								User.findOneAndUpdate({email: campaingResponseObj.email},{$set: {campaignSummary: temp, ['campaignResponse.'+key]: obj}},{new: true},function(err ,result2){
-									if(err){
+									if(err)
 										console.log(err);
-										return callback1(err);										
-									}
 									else{
 										campaingResponseObj = result2;
 										console.log(result2);
-										return callback1(null, "Done");
+										callback(null, "Done");
 									}
 								})
 							}
@@ -172,17 +166,11 @@ module.exports = function(mon){
 					}, function(err){
 						if(err){
 							console.log(err);
-							return _callback(err);
 						}
-						else{
-							console.log("Done!");
-							return _callback();
-						}
+						else{console.log("All Done!")}
 					});
-				}, function(err){
-					console.log("Finallllyyy done!")
-				})
-				callback(null,"Done");								
+				}
+				callback(null,"Done");
 			}
 		})
 	}
