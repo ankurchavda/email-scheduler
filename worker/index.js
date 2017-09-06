@@ -4,7 +4,9 @@ var express = require('express');
 var app = express();
 var fileUpload = require('express-fileupload');
 var bodyParser = require('body-parser');
+var logger = require('morgan');
 
+app.use(logger('tiny'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(fileUpload());
