@@ -69,8 +69,7 @@ module.exports.addBody = function(htmlPath, textPath, id, sender, email,callback
 	var text = fs.readFileSync(textPath, 'utf8');
 	const request = mailjet.post('campaigndraft').id(id).action('detailcontent').request({
 		'Html-part': html,
-		'Text-part': text,
-		'From': "\""+sender +"\"" + email
+		'Text-part': text
 	});
 	request
 		.then((result) => {
