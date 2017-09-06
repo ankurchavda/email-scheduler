@@ -137,6 +137,10 @@ process.on('message', (m) => {
 				});
 			},
 			function (callback) {
+				const end = Date.now() + 30000;
+ 					 while (Date.now() < end) {
+    					const doSomethingHeavyInJavaScript = 1 + 2 + 3;
+  						}
 				mail.campaignStats(newsLetterId, function (err, result) {
 					if (err) {
 						console.log(err + ' 7');
