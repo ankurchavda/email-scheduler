@@ -64,12 +64,13 @@ module.exports.prepareCampaign = function(sender, email, subject, contact, title
 			return callback(err);
 		});
 };
-module.exports.addBody = function(htmlPath, textPath, id, callback) {
+module.exports.addBody = function(htmlPath, textPath, id, sender, callback) {
 	var html = fs.readFileSync(htmlPath, 'utf8');
 	var text = fs.readFileSync(textPath, 'utf8');
 	const request = mailjet.post('campaigndraft').id(id).action('detailcontent').request({
 		'Html-part': html,
 		'Text-part': text
+		'From': sender
 	});
 	request
 		.then((result) => {
