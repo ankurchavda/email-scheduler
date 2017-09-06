@@ -115,7 +115,7 @@ process.on('message', (m) => {
 					);
 			},
 			function (callback) {
-				mail.addBody(m.htmlPath, m.textPath, newsLetterId, m.campaign.sender, function (err, result) {
+				mail.addBody(m.htmlPath, m.textPath, newsLetterId, m.campaign.sender, m.campaign.email,function (err, result) {
 					if (err) {
 						console.log(err + ' 5');
 						callback(err);

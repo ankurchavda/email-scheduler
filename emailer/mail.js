@@ -51,6 +51,7 @@ module.exports.prepareCampaign = function(sender, email, subject, contact, title
 	const request = mailjet.post('campaigndraft').request({
 		Locale: 'en_US',
 		Sender: sender,
+		SenderName: sender,
 		SenderEmail: email,
 		Subject: subject,
 		ContactsListID: contact,
@@ -73,7 +74,7 @@ module.exports.addBody = function(htmlPath, textPath, id, sender, email,callback
 	});
 	request
 		.then((result) => {
-			callback(null, result.body);
+			callback(null, result);
 		})
 		.catch((err) => {
 			return callback(err);
