@@ -35,13 +35,15 @@ module.exports = function(mon) {
 	};
 
 	module.getUsersOpen = function(limit, retailer, skip, gt, lt, callback) {
+		console.log("idhar bhi aaya!");
 		console.log('skip: ' + skip + ' ' + 'limit: ' + limit);
+		var id = mongoose.Types.ObjectId(skip);
 		User.find(
 			{
 				_id: {
-					$gt: skip
+					$gt: id
 				},
-				['campaignSummary.' + retailer + '.open']: {
+				['campaignSummary.' + retailer + '.Open']: {
 					$gte: gt,
 					$lt: lt
 				}
