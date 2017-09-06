@@ -137,7 +137,7 @@ process.on('message', (m) => {
 				});
 			},
 			function (callback) {
-				const end = Date.now() + 500;
+				const end = Date.now() + 1000;
  					 while (Date.now() < end) {
     					const doSomethingHeavyInJavaScript = 1 + 2 + 3;
   						}
@@ -146,6 +146,9 @@ process.on('message', (m) => {
 						console.log(err + ' 7');
 						callback(err);
 					} else {
+
+
+
 						console.log("newsletter "+newsLetterId);
 						console.log(result);
 						var campaignId = result.Data[0].CampaignID;
