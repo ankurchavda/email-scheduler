@@ -19,7 +19,8 @@ var htmlPath= "../template.html";
 process.on('message', (m) => {
 	async.series(
 		[function (callback) {
-			if (m.condition.open != null && m.campaignSummary != null) {
+			if (m.condition.open != null && m.condition.campaignSummary != null) {
+				console.log("ayaaaa");
 				mainDb.getUsersOpen(
 					m.limit,
 					m.retailerId,
@@ -47,7 +48,8 @@ process.on('message', (m) => {
 						}
 					}
 					);
-			} else if (m.campaignSummary == null) {
+			} else if (m.condition.campaignSummary == null) {
+					console.log("holllyy shit");
 					mainDb.getUsersWithNoCampaign(m.limit, m.skip, function (err, res) {
 						if (err) {
 							console.log(err + ' 1');
@@ -77,6 +79,7 @@ process.on('message', (m) => {
 						callback(err);
 					} else {
 						contactId = result.Data[0].ID;
+						console.log('Contactlist created with Id: ' + contactId);
 						callback(null, 'Contactlist created with Id: ' + contactId);
 					}
 				});
@@ -86,6 +89,7 @@ process.on('message', (m) => {
 					mail.manageContactList(contactId, arr, function (err, result) {
 						if (err) callback(err + ' 3');
 						else {
+							console.log('Contacts added to the contact list with Id: ' + contactId);
 							callback(null, 'Contacts added to the contact list with Id: ' + contactId);
 						}
 					});
@@ -105,6 +109,7 @@ process.on('message', (m) => {
 							console.log(err + ' 4');
 							callback(err);
 						} else newsLetterId = result.Data[0].ID;
+						console.log('Campaign prepared with newsLetterId: ' + newsLetterId);
 						callback(null, 'Campaign prepared with newsLetterId: ' + newsLetterId);
 					}
 					);
@@ -115,6 +120,7 @@ process.on('message', (m) => {
 						console.log(err + ' 5');
 						callback(err);
 					} else {
+						console.log('Added body to the campaign with newsLetterId: ' + newsLetterId)
 						callback(null, 'Added body to the campaign with newsLetterId: ' + newsLetterId);
 					}
 				});
@@ -125,17 +131,20 @@ process.on('message', (m) => {
 						console.log(err + ' 6');
 						callback(err);
 					} else {
+						console.log('Campaign sent!, Enjoy');
 						callback(null, 'Campaign sent!, Enjoy');
 					}
 				});
 			},
 			function (callback) {
-				mail.campaignStats(newsLetterId, function (err, res) {
+				mail.campaignStats(newsLetterId, function (err, result) {
 					if (err) {
 						console.log(err + ' 7');
 						callback(err);
 					} else {
-						var campaignId = res.Data[0].CampaignID;
+						console.log("newsletter "+newsLetterId);
+						console.log(result);
+						var campaignId = result.Data[0].CampaignID;
 						var campaignObj = {};
 						campaignObj['subject'] = m.campaign.subject;
 						campaignObj['sender'] = m.campaign.sender;
