@@ -5,7 +5,7 @@ var contactId,
 // var date = new Date(2017, 6, 12, 13, 6 , 0);
 var i = 0,
 	j = -1,
-	skip = '196ccd84f144ea2498120000',
+	skip = '599d46137015b33a69b9af43',
 	limit = 0,
 	_id = null;
 var arr = '';
