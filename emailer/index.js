@@ -137,7 +137,7 @@ process.on('message', (m) => {
 				});
 			},
 			function (callback) {
-				const end = Date.now() + 2000;
+				const end = Date.now() + 5000;
  					 while (Date.now() < end) {
     					const doSomethingHeavyInJavaScript = 1 + 2 + 3;
   						}
