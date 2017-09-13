@@ -1,9 +1,11 @@
-require('dotenv').config({path: "../development.env"});
+require('dotenv').config({
+	path: "../development.env"
+});
 var mailjet = require('node-mailjet').connect(process.env.MJ_PUBLIC_KEY, process.env.MJ_PRIVATE_KEY);
 var fs = require('fs');
 // const csvFilePath='.csv';
 
-module.exports.createContactList = function(name, callback) {
+module.exports.createContactList = function (name, callback) {
 	const request = mailjet.post('contactslist').request({
 		Name: name
 	});
@@ -16,7 +18,7 @@ module.exports.createContactList = function(name, callback) {
 		});
 };
 
-module.exports.deleteContactList = function(id, callback) {
+module.exports.deleteContactList = function (id, callback) {
 	const request = mailjet.delete('contactslist').id(id).request();
 	request
 		.then((result) => {
@@ -27,14 +29,12 @@ module.exports.deleteContactList = function(id, callback) {
 		});
 };
 
-module.exports.manageContactList = function(id, emails, callback) {
+module.exports.manageContactList = function (id, emails, callback) {
 	const request = mailjet.post('contact').action('managemanycontacts').request({
-		ContactsLists: [
-			{
-				ListID: id,
-				action: 'addforce'
-			}
-		],
+		ContactsLists: [{
+			ListID: id,
+			action: 'addforce'
+		}],
 		Contacts: emails
 	});
 	request
@@ -47,7 +47,7 @@ module.exports.manageContactList = function(id, emails, callback) {
 		});
 };
 
-module.exports.prepareCampaign = function(sender, email, subject, contact, title, callback) {
+module.exports.prepareCampaign = function (sender, email, subject, contact, title, callback) {
 	const request = mailjet.post('campaigndraft').request({
 		Locale: 'en_US',
 		Sender: sender,
@@ -65,7 +65,7 @@ module.exports.prepareCampaign = function(sender, email, subject, contact, title
 			return callback(err);
 		});
 };
-module.exports.addBody = function(htmlPath, textPath, id, sender, email,callback) {
+module.exports.addBody = function (htmlPath, textPath, id, sender, email, callback) {
 	var html = fs.readFileSync(htmlPath, 'utf8');
 	var text = fs.readFileSync(textPath, 'utf8');
 	const request = mailjet.post('campaigndraft').id(id).action('detailcontent').request({
@@ -81,7 +81,7 @@ module.exports.addBody = function(htmlPath, textPath, id, sender, email,callback
 		});
 };
 
-module.exports.sendCampaign = function(id, callback) {
+module.exports.sendCampaign = function (id, callback) {
 	const request = mailjet.post('campaigndraft').id(id).action('send').request();
 	request
 		.then((result) => {
@@ -92,7 +92,7 @@ module.exports.sendCampaign = function(id, callback) {
 		});
 };
 
-module.exports.draftStatus = function(id, callback) {
+module.exports.draftStatus = function (id, callback) {
 	const request = mailjet.get('campaigndraft').id(id).request();
 	request
 		.then((result) => {
@@ -103,7 +103,7 @@ module.exports.draftStatus = function(id, callback) {
 		});
 };
 
-module.exports.jobStatus = function(jobId, callback) {
+module.exports.jobStatus = function (jobId, callback) {
 	const request = mailjet.get('contact').action('managemanycontacts').id(jobId).request();
 	request
 		.then((result) => {
@@ -115,7 +115,7 @@ module.exports.jobStatus = function(jobId, callback) {
 		});
 };
 
-module.exports.campaignStats = function(id, callback) {
+module.exports.campaignStats = function (id, callback) {
 	const request = mailjet.get('campaignstatistics').request({
 		NewsLetter: id
 	});
@@ -129,7 +129,7 @@ module.exports.campaignStats = function(id, callback) {
 		});
 };
 
-module.exports.contactStats = function(email, callback) {
+module.exports.contactStats = function (email, callback) {
 	const request = mailjet.get('contactstatistics').id(email).request();
 	request
 		.then((result) => {
@@ -137,5 +137,39 @@ module.exports.contactStats = function(email, callback) {
 		})
 		.catch((err) => {
 			return callback(err);
+		});
+};
+
+
+module.exports.transactional = function (m, callback) {
+	var html = fs.readFileSync(m.htmlPath, 'utf8');
+	var text = fs.readFileSync(m.textPath, 'utf8');
+	const request = mailjet
+		.post("send", {
+			'version': 'v3.1'
+		})
+		.request({
+			"Messages": [{
+				"From": {
+					"Email": m.From.email,
+					"Name": m.From.name
+				},
+				"To": [{
+					"Email": m.To.email,
+					"Name": m.To.name
+				}],
+				"Subject": m.Subject,
+				"TextPart": text,
+				"HTMLPart": html
+			}]
+		});
+	request
+		.then((result) => {
+			return callback(null, result.body)
+		})
+		.catch((err) => {
+			console.log("error");
+			console.log(err);
+			return callback(err.statusCode)
 		});
 };

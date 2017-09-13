@@ -11,6 +11,9 @@ var i = 0,
 var arr = '';
 
 process.on('message', (m) => {
+
+	if(m.transactional == false){
+
 	arr = m.array;
 	var rule = new schedule.RecurrenceRule();
 	rule.second = m.recurrence.second;
@@ -43,4 +46,18 @@ process.on('message', (m) => {
 			console.log('emailer process exited with code ' + code);
 		});
 	});
+	}
+
+	else{
+
+		var worker_process = child_process.fork('../emailer/index.js');
+		worker_process.send(m);
+		worker_process.on('message', function(result){
+			process.send(result);
+		});
+		worker_process.on('close', function(code){
+			console.log('emailer excited with code '+code);
+			process.exit();
+		});
+	}
 });

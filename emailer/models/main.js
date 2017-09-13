@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-module.exports = function(mon) {
+module.exports = function (mon) {
 	var module = {};
 
 	var User = mon.model(
@@ -10,21 +10,27 @@ module.exports = function(mon) {
 			contactResponse: Object,
 			uuid: String,
 			preferences: String,
-			retailer: Object
+			retailer: Object,
+			transactional: [{
+				_id: false,
+				id: String,
+				from: String,
+				html: String,
+				text: String
+			}]
 		})
 	);
 
-	module.getUsersClick = function(limit, skip, click, callback) {
+	module.getUsersClick = function (limit, skip, click, callback) {
 		console.log('skip: ' + skip + ' ' + 'limit: ' + limit);
-		User.find(
-			{
-				_id: {
-					$gt: skip
+		User.find({
+					_id: {
+						$gt: skip
+					},
+					'campaignResponse.camp1.click': click
 				},
-				'campaignResponse.camp1.click': click
-			},
-			callback
-		)
+				callback
+			)
 			.limit(limit)
 			.sort('_id')
 			.select({
@@ -34,22 +40,21 @@ module.exports = function(mon) {
 			.lean();
 	};
 
-	module.getUsersOpen = function(limit, retailer, skip, gt, lt, callback) {
+	module.getUsersOpen = function (limit, retailer, skip, gt, lt, callback) {
 		console.log("idhar bhi aaya!");
 		console.log('skip: ' + skip + ' ' + 'limit: ' + limit);
 		var id = mongoose.Types.ObjectId(skip);
-		User.find(
-			{
-				_id: {
-					$gt: id
+		User.find({
+					_id: {
+						$gt: id
+					},
+					['campaignSummary.' + retailer + '.Open']: {
+						$gte: gt,
+						$lt: lt
+					}
 				},
-				['campaignSummary.' + retailer + '.Open']: {
-					$gte: gt,
-					$lt: lt
-				}
-			},
-			callback
-		)
+				callback
+			)
 			.limit(limit)
 			.sort('_id')
 			.select({
@@ -59,18 +64,17 @@ module.exports = function(mon) {
 			.lean();
 	};
 
-	module.getUserOpenNCLick = function(limit, skip, click, open, callback) {
+	module.getUserOpenNCLick = function (limit, skip, click, open, callback) {
 		console.log('skip: ' + skip + ' ' + 'limit: ' + limit);
-		User.find(
-			{
-				_id: {
-					$gt: skip
+		User.find({
+					_id: {
+						$gt: skip
+					},
+					'campaignResponse.camp1.click': click,
+					'campaignResponse.camp1.open': open
 				},
-				'campaignResponse.camp1.click': click,
-				'campaignResponse.camp1.open': open
-			},
-			callback
-		)
+				callback
+			)
 			.limit(limit)
 			.sort('_id')
 			.select({
@@ -80,16 +84,15 @@ module.exports = function(mon) {
 			.lean();
 	};
 
-	module.getUsers = function(limit, skip, callback) {
+	module.getUsers = function (limit, skip, callback) {
 		console.log('skip: ' + skip + ' ' + 'limit: ' + limit);
-		User.find(
-			{
-				_id: {
-					$gt: skip
-				}
-			},
-			callback
-		)
+		User.find({
+					_id: {
+						$gt: skip
+					}
+				},
+				callback
+			)
 			.limit(limit)
 			.sort('_id')
 			.select({
@@ -99,19 +102,24 @@ module.exports = function(mon) {
 			.lean();
 	};
 
-	module.getUsersWithNoCampaign = function(limit, skip, callback) {
+	module.updateTransactionalDetails = function (email, object, callback) {
+		console.log("aya");
+		User.findOneAndUpdate({"email": email},{$push: {"transactional": object}},callback);
+	}
+
+
+	module.getUsersWithNoCampaign = function (limit, skip, callback) {
 		console.log('skip: ' + skip + ' ' + 'limit: ' + limit);
-		User.find(
-			{
-				_id: {
-					$gt: skip
+		User.find({
+					_id: {
+						$gt: skip
+					},
+					campaignSummary: {
+						$eq: null
+					}
 				},
-				campaignSummary: {
-					$eq: null
-				}
-			},
-			callback
-		)
+				callback
+			)
 			.limit(limit)
 			.sort('_id')
 			.select({
