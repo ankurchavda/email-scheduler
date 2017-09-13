@@ -48,5 +48,34 @@ module.exports = function(User, Campaign){
 			result.end();
 		})
 	})
+
+	router.post('/campaignstats', function(req,res){
+		var retailer = req.body.retailer;
+		var from = req.body.from;
+		var to = req.body.to;
+		Repo.campaignSummaryForClient(Campaign, retailer, from, to , function(err,result){
+			if(err){
+				res.send(err);
+			}
+			else{
+				res.status(200).send("Done");
+			}
+		})
+	})
+
+	router.get('/campaignstats/:retailerId/ID/:id', function(req,res){
+		var retailer = req.params.retailerId;
+		var id = req.params.id;
+		console.log(retailer);
+		console.log(id);
+		Repo.campaignStatistic(Campaign, retailer,id, function(err,result){
+			if(err){
+				res.send(err);
+			}
+			else{
+				res.status(200).send(result);
+			}
+		})
+	})
 	return router;
 }

@@ -5,27 +5,58 @@ const csv = require('csvtojson')
 var async = require('async');
 var fs = require('fs');
 var mailjet = require('node-mailjet').connect(process.env.MJ_PUBLIC_KEY, process.env.MJ_PRIVATE_KEY);
+var json2csv = require('json2csv');
 
+
+var fields = ["BlockedCount",
+	"BouncedCount",
+	"CampaignID",
+	"CampaignIsStarred",
+	"CampaignSendStartAt",
+	"CampaignSubject",
+	"ClickedCount",
+	"ContactListName",
+	"DeliveredCount",
+	"LastActivityAt",
+	"NewsLetterID",
+	"OpenedCount",
+	"ProcessedCount",
+	"QueuedCount",
+	"SegmentName",
+	"SpamComplaintCount",
+	"UnsubscribedCount",
+	"Sender"
+]
+
+// Welcome to the jungle O_o
 module.exports.getCampaignResponse = function (User, Campaign, callback) {
 	let count = 0;
 	Campaign.getCampaigns(function (err, res) {
 		if (err)
 			return callback(err);
 		else {
-			var responses = [];
-			console.log("ep 1");
+			var responses = []; // response for one campaign
+			var campaignsToUpdate = []; // Set the campaign _id's response to true
+			var cummulativeResponse = []; // Response of all the camapaigns
 
+			// Beginning of some function inceptions *Tautology*
 			function GetResponse(callback) {
-				async.eachOfSeries(res, function (value, camp, callback1) {
-					let _id = value._id;
+
+				// Start of the GetResponse function execution
+				async.eachSeries(res, function (value, callback1) {
+					campaignsToUpdate.push(value._id);
 					let arr = value.campaignID;
-					async.eachOfSeries(arr, function (value1, i, callback2) {
+
+					// Function used in the second level of async.eachSeries
+					function MailjetLooper(value1, callback2) {
 						let users = value1.users;
 						let id = value1.id;
 						let loop = Math.ceil(users / 1000);
 						let limit = 0,
 							offset = 0;
-						async.timesSeries(loop, function (n, callback3) {
+
+						// Function used in the third level of async.eachSeries
+						function LoopTheThousand(n, callback3) {
 							if (users > 1000) {
 								limit = 1000;
 								users -= limit;
@@ -33,8 +64,6 @@ module.exports.getCampaignResponse = function (User, Campaign, callback) {
 								limit = users;
 							}
 							console.log(limit + " limit " + offset + " offset");
-							var start = Date.now();
-							// while (Date.now() < start + 100) {}
 							const request = mailjet
 								.get("messagesentstatistics")
 								.request({
@@ -47,96 +76,112 @@ module.exports.getCampaignResponse = function (User, Campaign, callback) {
 								.then((result) => {
 									let data = result.body.Data;
 									var loop = 0;
-									// var a = data.slice(0);
-									// responses = responses.concat(data);
 									async.eachSeries(data, function (single, callback4) {
 										single['retailer'] = value.retailer;
 										single['campId'] = id;
-										single['_id'] = _id;
 										responses.push(single);
 										return callback4();
 									}, function (err) {
-										// console.log(responses);
 										if (err) {
 											return callback3(err);
 										}
 										return callback3();
 									})
-									// return callback3();
 								})
 								.catch((err) => {
 									console.log(err);
 									return callback3(err)
 								})
 							offset += limit;
-						}, function (err) {
+						}
+						// *** LoopTheThousand end ***
+
+						// Third level async.eachSeries
+						async.timesSeries(loop, LoopTheThousand, function (err) {
 							if (err) {
 								return callback2(err);
 							}
+							cummulativeResponse.push({
+								_id: value._id,
+								response: responses
+							});
+							responses = [];
 							return callback2()
 						})
-					}, function (err) {
+					}
+					// *** MailjetLooper end ***
+
+					// Second level async.eachSeries
+					async.eachSeries(arr, MailjetLooper, function (err) {
 						if (err) {
+							// Throw error to the First level async.eachSeries if an err							
 							return callback1(err);
 						}
+						//Finish if okay
 						return callback1()
 					})
 				}, function (err) {
 					if (err) {
+						// Throw error for async.series
 						return callback(err)
 					}
 					console.log(responses);
+					//Successfully complete GetResponse
 					return callback()
 				})
 			}
 
+			// To update the campaign responses in the database and setting the responses to true
+			// in campaign model
+
 			function ResponseUpdate(callback) {
 				var count = 0;
-				async.eachOfSeries(responses, function (value2, val, callback4) {
-					let jsonObj = value2;
-					let email = jsonObj.ToEmail;
-					jsonObj['summary'] = 'f';
-					let tempObj = {};
-					tempObj[jsonObj['campId']] = jsonObj;
-					let options = {
-						new: true
-					};
-					let campId = jsonObj['campId'];
-					let _id = jsonObj['_id'];
-					delete jsonObj.campId;
-					delete jsonObj._id;
 
+				async.eachSeries(cummulativeResponse, function (value, callback1) {
+					var array = value.response;
+					var _id = value._id;
+					async.eachSeries(array, function (value2, _callback) {
+						let jsonObj = value2;
+						let email = jsonObj.ToEmail;
+						jsonObj['summary'] = 'f';
+						let tempObj = {};
+						tempObj[jsonObj['campId']] = jsonObj;
+						let options = {
+							new: true
+						};
+						let campId = jsonObj['campId'];
+						delete jsonObj.campId; // ****optimizable****
 
-					async.parallel([function (_callback) {
 						User.addCampaignResponse(email, campId, tempObj, options, function (err, results) {
 							if (err) {
 								return _callback(err);
 							} else {
-								// console.log(results);
 								return _callback();
 							}
-						})
-					}, function (_callback) {
-						Campaign.updateResponse(_id, function (err, results2) {
-							if (err)
-								return _callback(err);
-							else {
-								// console.log(count++);
-								return _callback();
-							}
-						})
-					}], function (err) {
+						});
+
+					}, function (err) {
 						if (err) {
-							return callback4(err)
-						} else {
-							return callback4(err)
+							console.log(err);
+							return callback1(err);
 						}
+						Campaign.updateResponse(_id, function (err, result) {
+							if (err)
+								return callback1(err);
+							else {
+								return callback1(err, result);
+							}
+						})
 					})
 				}, function (err) {
-					console.log(err);
+					if (err)
+						return callback(err);
+
 					return callback();
 				})
+
 			}
+
 
 			async.series([GetResponse, ResponseUpdate], function (err) {
 				if (err) {
@@ -148,8 +193,7 @@ module.exports.getCampaignResponse = function (User, Campaign, callback) {
 			})
 		}
 	})
-
-	return callback();
+	return callback(); // Note to self: find a solution
 }
 
 module.exports.addUser = function (path, file, User, callback) {
@@ -178,6 +222,7 @@ module.exports.addUser = function (path, file, User, callback) {
 				})
 		}
 	})
+
 }
 
 module.exports.generateInvoice = function (Campaign, retailer, from, to, callback) {
@@ -265,4 +310,71 @@ module.exports.generateInvoice = function (Campaign, retailer, from, to, callbac
 			})
 		}
 	})
+
+}
+
+module.exports.campaignSummaryForClient = function (Campaign, retailer, from, to, callback) {
+	var data = [];
+	Campaign.getCampaignsBetweenDates(retailer, from, to, function (err, res) {
+		if (err) {
+			callback(err);
+		} else {
+			console.log(res);
+			async.eachSeries(res, function (value, callback1) {
+				var campaign = value.campaignID;
+				var email = value.campaign.email;
+				async.eachSeries(campaign, function (ids, callback2) {
+					var campaignID = ids.id;
+					const request = mailjet.get('campaignstatistics').id(campaignID).request();
+					request
+						.then((result) => {
+							console.log(result.body);
+							var response = result.body.Data[0];
+							response['Sender'] = email;
+							data.push(response);
+							callback2();
+						})
+						.catch((err) => {
+							console.log(err);
+							callback2(err.statusCode);
+						});
+				}, function (err) {
+					if (err) {
+						callback1(err);
+					} else {
+						callback1()
+					}
+				})
+			}, function (err) {
+				if (err) {
+					callback(err);
+				} else {
+					console.log(data);
+					var csv = json2csv({
+						data: data,
+						fields: fields
+					});
+
+					fs.writeFile('file.csv', csv, function (err) {
+						if (err) throw err;
+						console.log('file saved');
+					});
+					callback();
+				}
+			})
+
+		}
+	})
+}
+
+module.exports.campaignStatistic = function (Campaign, retailer, id, callback) {
+	const request = mailjet.get('campaignstatistics').id(id).request();
+	request
+		.then((result) => {
+			callback(null, result.body);
+		})
+		.catch((err) => {
+			console.log(err);
+			callback(err.statusCode);
+		});
 }
