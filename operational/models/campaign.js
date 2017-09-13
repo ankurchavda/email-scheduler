@@ -30,7 +30,10 @@ module.exports = function(mon){
 	}
 
 	module.getCampaignsBetweenDates = function(retailer, from, to, callback){
-		Campaign.find({retailer: retailer , date: {$gte: new Date(from.year,from.month,from.date) , $lte: new Date(to.year,to.month,to.date)}} ,callback);
+		var fromDate = new Date(from.year,from.month-1,from.date);
+		var toDate = new Date(to.year,to.month-1,to.date);
+		console.log(fromDate);
+		Campaign.find({retailer: retailer , date: {$gte: fromDate , $lte:toDate }} ,callback);
 	}
 	return module;
 }
