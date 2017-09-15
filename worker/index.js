@@ -1,12 +1,14 @@
 const fs = require('fs');
-var instance = require('./instance');
-var express = require('express');
-var app = express();
-var fileUpload = require('express-fileupload');
-var bodyParser = require('body-parser');
-var logger = require('morgan');
+const instance = require('./instance');
+const express = require('express');
+const app = express();
+const fileUpload = require('express-fileupload');
+const bodyParser = require('body-parser');
+const logger = require('morgan');
+const async = require('async');
+const _ = require('lodash');
 
-app.use(logger('tiny'));
+app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(fileUpload());
@@ -57,13 +59,26 @@ app.post('/transactional', function (req, res) {
 			throw err;
 	});
 	var obj = JSON.parse(file.data.toString('ascii'));
-	console.log(obj);
-	obj['transactional'] = true;
-	instance.createTransactionInstance(obj, function (err, result) {
-		if (err)
-			res.send(err);
-		else res.status(200).send(result);
-	});
+	var counter=0;
+	_.forEach(obj, function (value, key) {
+		if (value == null || value == "") {
+			return res.send(key + " parameter is empty");
+		}
+		counter++;
+		if (counter === _.size(obj)) {
+			console.log(obj);
+			obj['transactional'] = true;
+			obj['textPath'] = "../template.txt";
+			obj['htmlPath'] = "../template.html";
+			instance.createTransactionInstance(obj, function (err, result) {
+				if (err)
+					res.send(err);
+				else {
+					res.status(200).send("Email Sent Successfully!");
+				}
+			});
+		}
+	})
 })
 
 app.listen(app.get('port'));

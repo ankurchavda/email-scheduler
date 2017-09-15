@@ -13,7 +13,7 @@ module.exports.createTransactionInstance = function(jsonObj,callback) {
 	worker_process.send(jsonObj);
 	
 	worker_process.on('message', function(result){
-		callback(result);
+		callback();
 	})
 	
 	worker_process.on('close', function(code) {
