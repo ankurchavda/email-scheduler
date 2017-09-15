@@ -99,5 +99,5 @@ const server = new SMTPServer({
     }
 });
 
-server.listen(process.env.PORT);
-console.log("Listening on " + process.env.PORT);
+server.listen(process.env.SMTP_PORT);
+console.log("Listening on " + process.env.SMTP_PORT);
