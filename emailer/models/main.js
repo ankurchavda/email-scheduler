@@ -103,8 +103,7 @@ module.exports = function (mon) {
 	};
 
 	module.updateTransactionalDetails = function (email, object, callback) {
-		console.log("aya");
-		User.findOneAndUpdate({"email": email},{$push: {"transactional": object}},callback);
+		User.findOneAndUpdate({"email": email},{$push: {"transactional": object}},{upsert: true},callback);
 	}
 
 
