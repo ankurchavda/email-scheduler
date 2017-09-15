@@ -1,0 +1,20 @@
+{
+  "name": "smtpnew",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Ankur Chavda",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.5.0",
+    "dotenv": "^4.0.0",
+    "mailparser": "^2.0.5",
+    "randomstring": "^1.1.5",
+    "request": "^2.81.0",
+    "smtp-server": "^3.1.0"
+  }
+}
